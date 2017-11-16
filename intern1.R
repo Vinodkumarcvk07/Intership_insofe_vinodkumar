@@ -5,14 +5,17 @@
 #-----------------------------------------------------------------------------------------------------------------
 #Abstract: US Congressmen voting records datset for 16 random/important 16 bills of previous Quater/year 
 
-#Objective: To bulid a model and predict --------?
+
+#Objective: To bulid a model and predict ---which congress bill pass -----?
 
 #-------------------------------------------------------------------------------------------------------------------
 #removing the previous existed global environment variables 
 rm(list=ls(all=TRUE))
+#-------------------------#
+#Seting working directory #
+#-------------------------#
 setwd("D:/DATA SCIENCE/Internship")
 getwd()
-
 #-------------------------------------------------------------------------------------------------------------------------
 #
 #install.packages("mlr") # it has all required machine learning libraries 
@@ -58,7 +61,7 @@ summary(data2) # I can see
 #view the structure of data set, attributes and data types
 str(data2)
 #It is a Data frame having 435 rows/observations and 17 columns/variables
-#V1 to V17 all are Factor, having 3 levels expect  V1 has (2 levels)
+#V1 to V17 all are Factor, having 3 levels expect V1 has (2 levels)-- Y or N ,Democratic or Republican
 #----------------------------------------------------------------------------------------------------------------------------
 is.data.frame(data2)
 #TRUE
@@ -66,7 +69,7 @@ is.data.frame(data2)
 #vaiable names
 names(data2)
 
-#[1] "V1"  "V2"  "V3"  "V4"  "V5"  "V6"  "V7"  "V8"  "V9"  "V10" "V11" "V12" "V13" "V14"
+ #[1] "V1"  "V2"  "V3"  "V4"  "V5"  "V6"  "V7"  "V8"  "V9"  "V10" "V11" "V12" "V13" "V14"
 #[15] "V15" "V16" "V17"
 #-----------------------------------------------------------------------------------------
 head(data2)
@@ -78,14 +81,73 @@ head(data2)
 #5   democrat  y  y  y  n  y  y  n  n   n   n   y   ?   y   y   y   y
 #6   democrat  n  y  y  n  y  y  n  n   n   n   n   n   y   y   y   y
 #--------------------------------------------------------------------------------
+sum(is.na(data2)) 
+# it is showing 0 null values
+#---------------------------------------------------------------------------------
+data2[data2=="?"]<- NA  # assign "?"  values with NA
+head(data2) #now ? is raplaced with NA
+#---------------------------------------------------------------------------------
+sum(is.na(data2)) #it is showing #392 null values
+#--------------------------------------------------------------------------------
+#checkig how much percentage of missing values are there in dataset
+count(data2$V1) 
+#          x freq 
+#   democrat  267
+# republican  168
+data2[count(frequency(data2$V1,exclude = "democrat"))]
+count(data2$V2)
+sum(is.na(data2$V1))
+sum(is.na(data2$V2))
+count(data2$V2)         
+colSums(~.,data2)         
 
-plot(data2)
-plot(data2$V1,data2V2)
+unique(data2$V1)#e="democrat")
+unique(is.na((data2$V2))
+unique(data2$V10)
+
+summarizeColumns(data2)
+summarizeColumns(data2$V)
+summarizeCo
+
+head(data2)
+
+sum(is.na(data2$V1))
+sum(is.na(data2$V3=="n")) #48
+sum(is.na(data2$V16=="n")) #28
+sum(is.na(data2$V1,]))
+sum(is.na(data2))
+sum(is.na(data2))
+#----------------------------------------------
+for (i in 1:16)
+{
+  sum((is.na(data2[,i]))
+}
+
+
+#checking each column and each row hou much percentage value are missing values 
+
+
+#-------------------------------------------------------------------------------
+
+plot(data2$V1,data2$V2)
+plot(data2$V2,data2$V3)
 plot(data2$V3)
-plot(~.,data=data2)
-plot.default(data2)
-?hist()
 
+#----------------------------------------
+for (i in 1:16)
+{
+  plot(data2[,i])
+}
+#================
+for(i in 1:16)
+{
+  dev.copy(jpeg,filename=paste(names(data2[i]),"plot.jpeg",sep="@" ))
+  plot(data2[,i])
+  dev.off()
+}
+
+barplot(as.matrix(data2), main="congressvotes", xlab= "type of votes",ylab= "no of votes polled",
+        ,col=rainbow())
 
 
 
