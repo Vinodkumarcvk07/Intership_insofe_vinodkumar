@@ -9,10 +9,14 @@
 rm(list=ls(all=TRUE))
 
 #Setting working directory 
-setwd("D:/DATA SCIENCE/Internship/Week3")
+setwd("F:/DATA SCIENCE/Internship/Week3")
 getwd()
 
 #installing required libraries
+# install.packages("mlr")
+# install.packages("DMwR")
+# install.packages("ggplot2")
+# install.packages("dplry")
 library(mlr)  # it has all required machine learning libraries 
 library(DMwR) # for 
 library(ggplot2) # create elgant data Visualisation using the grammer of graphics
@@ -48,7 +52,7 @@ str(actual_data)
 
 #head # gives first 6 rows of data
 head(actual_data)
-
+#View(actual_data)
 #tail # gives last 6 rows of data 
 tail(actual_data)
 
@@ -82,7 +86,7 @@ lables = c("classname","handicapped_infants","water_project_cost_sharing",
            "el_salvador_aid","religious_groups_in_schools",
            "anti_satellite_test_ban","aid_to_nicaraguan_contras",
            "mx_missile","immigration","synfuels_corporation_cutback",
-           "education_spending","superfund_right-to_sue","crime","duty_free_exports",
+           "education_spending","superfund_right_to_sue","crime","duty_free_exports",
            "export_administration_act_south_africa")
 
 #replacing all column names with new lables 
@@ -101,27 +105,29 @@ droplevels(actual_data)->actual_data
 #////////////////////////////
 #/////Data Visualization////      
 #///////////////////////////
-
+library(ggplot2)
 summary(actual_data$classname) 
 # democrat republican 
 # 267        168
 prop.table(table(actual_data$classname))               
 # democrat republican 
 # 0.6137931  0.3862069 
-qplot(x = classname,ylab ='number of memberes voted', data = actual_data, geom = "bar",title="class lable")
-qplot(x = crime,ylab ='number of memberes voted',color=classname, data = actual_data, geom = "bar")
+
+qplot(x = classname,,color=classname,xlab="Name of Party",ylab ='Number of memberes voted', data = actual_data, geom = "auto",main ="class lable")
+#qplot(x= classname,color=T,xlab="Name of Party",ylab ='Number of memberes voted', data = actual_data, geom = "auto",main ="class lable"))
+qplot(x = crime,ylab ='number of memberes voted',color=classname, data = actual_data)
 
 #using ggplot we can print Value Freqency and Proportions of each attribute/variable 
 ggplot(actual_data, aes(x=classname),colors()) + theme_bw() + geom_bar() + labs(y="Number of Congressmen",x="No of Parties", title= "Members Voted by each party")
 
 
-par(mfrow=c(4,5))
-for(i in 1:17){
-  plot(actual_data[,i],xlab = names(actual_data[i]),ylab="no of memers")
-  dev.copy(jpeg,filename="final.jpg" )
+par(mfrow=c(4,4))
+for(i in 2:17){
+  plot(actual_data[,i],color=classname,xlab = names(actual_data[i]),ylab="no of representatives",main="plot of each variable")
+  dev.copy(jpeg,filename="final7.jpg" )
   dev.off()
   #ggplot(actual_data, aes(x=actual_data[,i]),colours()) + theme_classic() +geom_bar() + labs(y=y="Number of Congressmen",x="No of Parties", title= "Members Voted by each party")
-}
+}  
 
 # View(data)
 plot(as.factor(actual_data[,2]))
@@ -133,17 +139,20 @@ for(i in 2:17){
 }
 
 write.csv(actual_data,"housevotes.csv")
-
+#View(actual_data)
 #------------------------------------------------------------------------------------
-setwd("D:/DATA SCIENCE/Internship/Week3")
-congress_data<-read.csv("housevotes.csv",sep=',')
-
+#setwd("D:/DATA SCIENCE/Internship/Week3")
+#congress_data<-read.csv("housevotes.csv",sep=' ')
+#congress_data$=NULL
+congress_data<-actual_data
 str(congress_data)
+
 #ploting using plot
+
 par(mfrow=c(3,6))
 for(i in 2:17){
-  plot(congress_data[,i],col=congress_data$classname,xlab = names(congress_data[i]),ylab = "number of members voted")
-  dev.copy(jpeg,filename="final.jpg" )
+  plot(congress_data[,i],xlab = names(congress_data[i]),ylab = "number of representatives",main="congressional voting")
+  dev.copy(jpeg,filename="final9.jpg" )
   dev.off()
 }
  
@@ -162,11 +171,12 @@ omited_mis_congress_data<-na.omit(congress_data)
 str(omited_mis_congress_data)
 dim(omited_mis_congress_data)
 
-
+#spliting data into republic and democratic
 republic <- congress_data[which(congress_data$classname == 'republican'),]
 democrat <- congress_data[which(congress_data$classname == 'democrat'),]
 
 #### Central Imputation #######
+library(DMwR)
 
 sum(is.na(republic))  #131
 sum(is.na(democrat))  #261
@@ -180,6 +190,7 @@ imputed_congress_data <- rbind(republic,democrat)
 dim(imputed_congress_data)
 write.csv(imputed_congress_data,"imputed_congress_data.csv")
 
+
 #divide into data in to training,test 80,20 proportions
 set.seed(5000)
 proportion_data <- sample(seq(1,2),size = nrow(imputed_congress_data),replace = TRUE, prob = c(.8, .2))
@@ -188,6 +199,8 @@ test_congress_data <- imputed_congress_data[proportion_data == 2,]
 #
 dim(train_congress_data)
 dim(test_congress_data)
+names(test_congress_data)
+names(train_congress_data)
 
 ##///////////////######
 ###Model Building######
@@ -204,9 +217,13 @@ pred_test_congress_data<-predict(nb_model_congress_data,test_congress_data[,-1])
 summary(pred_test_congress_data)
 
 summary(pred_train_congress_data)
+conf_train_congress_data<-confusionMatrix(pred_train_congress_data,train_congress_data$classname)
 
+conf_train_congress_data
 conf_test_congress_data<-confusionMatrix(pred_test_congress_data,test_congress_data$classname)
 conf_test_congress_data
+mmetric(train_congress_data$classname,pred_train_congress_data,c("ACC","PRECISION","TPR","F1"))
+mmetric(test_congress_data$classname,pred_test_congress_data,c("ACC","PRECISION","TPR","F1"))
 
 library(MLmetrics)
 
@@ -222,16 +239,21 @@ Recall(test_congress_data$classname,pred_test_congress_data)
 
 #install.packages("ROCR")
 library(ROCR)
-logistic_model<-glm(classname~.,data = train_congress_data,'binomial')
+
+#install.packages("glmnet")
+library(glmnet)
+logistic_model<-glm(classname~.,data = train_congress_data,family="binomial")
 logistic_model
 summary(logistic_model)
 
 pred_train_log <- predict(logistic_model,type = "response")
 pred <- prediction(pred_train_log,train_congress_data$classname)
 
+
 pred_log_congress_data<- predict(logistic_model,test_congress_data[,-1],type="response")
 
-pref<-performance(pred, measure ="tpr", x.measure = "fpr")
+
+pref<-performance(pred, measure ="TPR", x.measure = "FPR")
 pref
 
 ###plot Roc curve
@@ -251,16 +273,21 @@ library(caret)
 conf_log_test <- confusionMatrix(preds_log_test,test_congress_data$classname)
 conf_log_test
 
+mmetric(test_congress_data$classname,pred_log_test,c("ACC","PRECISIOn","TPR","F1"))
+
+mmetric(train_congress_data$classname,pred_train_log,c("ACC","PRECISION","TPR","F1"))
+
 
 #/////////////////#
 ###Random forest###
 #/////////////////#
 
-install.packages("gplots")
-library("gplots")
-install.packages("randomForest")
-library("randomForest")
+install.packages("ggplot2")
+library(ggplot2)
 
+install.packages("randomForest")
+library(randomForest)
+names(train_congress_data)
 Modelforest <- randomForest(classname~.,data = train_congress_data)
 Modelforest
 
@@ -296,6 +323,10 @@ resultest
 resultRF <- data.frame(rbind(resultrain,resultest))
 resultRF
 
+mmetric(train_congress_data$classname,prob_train,c("ACC","PRECISION","TPR","F1"))
+
+mmetric(test_congress_data$classname,prob_test,c("ACC","PRECISIOn","TPR","F1"))
+
 
 #//////////////////////#
 # ///decisiontrees/////# 
@@ -303,20 +334,35 @@ resultRF
 
 #install.packages("caret")
 library(caret)
-#install.packages(c('rpart','rpart.plot'))
+install.packages(c('rpart','rpart.plot'))
 install.packages('rpart.plot')
 library(rpart)
 library(rpart.plot)
 
 model_rpart <-rpart(classname~.,data=train_congress_data)
 summary(model_rpart)
-
+par(mfrow = c(1,2))
 rpart.plot(model_rpart)
-pred_rpart<-predict(model_rpart,test_congress_data[,-1],'class')
+pred_test_rpart<-predict(model_rpart,test_congress_data)
 
-conf_rpart<-table(pred_rpart,test_congress_data$classname)
-conf_rpart
-summary(conf_rpart)
+pred_train_rpart<-predict(model_rpart,train_congress_data[,-1],"class")
+
+pred_train_rpart
+
+tab_trn_rpart<-table(pred_train_rpart,train_congress_data$classname)
+
+mmetric(train_congress_data$classname,pred_train_rpart,c("ACC","PRECISION","TPR","F1"))
+
+mmetric(test_congress_data$classname,pred_test_rpart,c("ACC","PRECISIOn","TPR","F1"))
 
 
-#---------------------------------------------------------------
+`#---------------------------------------------------------------
+
+
+
+
+
+
+
+
+
